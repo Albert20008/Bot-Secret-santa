@@ -17,7 +17,7 @@ from telegram.ext import Updater, CommandHandler
 
 BOT_ID = "@alberttopbot"
 BOT_TOKEN = "665130047:AAGWlmEIO7-G419YqMCA8g9BlH5jnExv75E"
-BOT_APPNAME = "ИМЯ_ПРИЛОЖЕНИЯ"
+BOT_APPNAME = "secretsanta2008"
 
 #
 # Типы данных
