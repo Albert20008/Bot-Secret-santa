@@ -71,6 +71,7 @@ def hello_name_command(bot, update, args):
 #
 
 def main():
+    _restore()
     updater = Updater(BOT_TOKEN)
 
     updater.dispatcher.add_handler(CommandHandler("hello_world", hello_command))
@@ -78,6 +79,16 @@ def main():
 
     updater.start_polling()
     print("Bot started polling")
+
+    updater.idle()
+
+if "PORT" in os.environ:
+        updater.start_webhook(listen="0.0.0.0", port=int(os.environ["PORT"]), url_path=BOT_TOKEN)
+        updater.bot.set_webhook("https://{}.herokuapp.com/{}".format(BOT_APPNAME, BOT_TOKEN))
+        print("Bot started on webhook")
+    else:
+        updater.start_polling()
+        print("Bot started polling")
 
     updater.idle()
 
