@@ -119,11 +119,14 @@ def hello_command(bot, update):
     me = _get_user(update)
 
     _send_text(bot, me, "Привет, мир!")
+    _save()
 
 def hello_name_command(bot, update, args):
     me = _get_user(update)
 
     _send_text(bot, me, "Привет, {}!".format(args[0]))
+
+    _save()
 
 #
 # Главная функция
