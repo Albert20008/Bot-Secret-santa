@@ -82,7 +82,7 @@ def main():
 
     updater.idle()
 
-if "PORT" in os.environ:
+    if "PORT" in os.environ:
         updater.start_webhook(listen="0.0.0.0", port=int(os.environ["PORT"]), url_path=BOT_TOKEN)
         updater.bot.set_webhook("https://{}.herokuapp.com/{}".format(BOT_APPNAME, BOT_TOKEN))
         print("Bot started on webhook")
