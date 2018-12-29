@@ -128,6 +128,25 @@ def hello_name_command(bot, update, args):
 
     _save()
 
+def create_santa(bot, update, args):
+    me = _get_user(update)
+
+    if not args:
+        _send_md(bot, me, "Чтобы создать группу Тайного Санты, наберите `/create имя_группы`, где `имя_группы` это любая строка, которая будет идентифицировать вашу группу")
+        return
+    
+    group_name = ' '.join(args)
+
+    if group_name in santas:
+        _send_text(bot, me, "К сожалению, это имя группы уже занято, попробуйте выбрать другое")
+        return
+
+    santas[group_name] = Group(me, [me, me], {})
+    _send_text(bot, me, "Поздравляю, ваша группа Тайного Санты создана! Отправьте всем участникам группы следующее сообщение, которое поможет им вступить в вашу группу")
+    _send_md(bot, me, "Привет! {} создал(а) группу Тайного Санты и хочет, чтобы вы приняли в ней участие. Для этого добавьте меня ({}) и отправьте мне сообщение `/join {}`".format(me.real_name, BOT_ID, group_name))
+
+    _save()
+
 #
 # Главная функция
 #
@@ -138,6 +157,7 @@ def main():
 
     updater.dispatcher.add_handler(CommandHandler("hello_world", hello_command))
     updater.dispatcher.add_handler(CommandHandler("hello", hello_name_command, pass_args=True))
+    updater.dispatcher.add_handler(CommandHandler("create", create_santa, pass_args=True))
 
     updater.start_polling()
     print("Bot started polling")
