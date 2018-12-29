@@ -6,10 +6,12 @@
 #
 # Подключение библиотек
 #
-
+import os
+import random
+import pickle
 from collections import namedtuple
 from telegram import ParseMode
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler
 
 #
 # Общие константы
@@ -30,9 +32,18 @@ User = namedtuple("User", (
     "chat_id"
 ))
 
+Group = namedtuple("Group", (
+    "creator",
+    "members",
+    "pairs"
+))
 #
 # Глобальные переменные
 #
+
+santas = {}
+
+wishes = {}
 
 #
 # Вспомогательные функции
@@ -44,6 +55,22 @@ def _send_text(bot, user, text):
 def _send_md(bot, user, text):
     bot.send_message(chat_id=user.chat_id, text=text, parse_mode=ParseMode.MARKDOWN)
 
+def _resend_message(bot, user, message):
+    if message.text:
+        bot.send_message(chat_id=user.chat_id, text=message.text)
+    
+    if message.sticker:
+        bot.send_sticker(chat_id=user.chat_id, sticker=message.sticker)
+    
+    if message.photo:
+        bot.send_photo(chat_id=user.chat_id, photo=message.photo[0], caption=message.caption)
+    
+    if message.audio:
+        bot.send_audio(chat_id=user.chat_id, audio=message.audio)
+    
+    if message.voice:
+        bot.send_voice(chat_id=user.chat_id, voice=message.voice)
+
 def _get_user(update):
     return User(
         update.message.from_user.id,
@@ -52,6 +79,38 @@ def _get_user(update):
         update.message.chat_id
     )
 
+def _generate_santa_pairs(bot, group_name):
+    group = santas[group_name]
+
+    members = group.members.copy()
+    random.shuffle(members)
+
+    group.pairs.clear()
+
+    for i, member in enumerate(members):
+        pair = members[(i+1) % len(members)]
+        group.pairs[member.id] = pair
+    
+    for member in group.members:
+        pair = group.pairs[member.id]
+        _send_md(bot, member, "Привет! Настало время поздравлений в группе `{0}` Тайного Санты! Вам выпало поздравлять пользователя @{1} ({2}). Отправьте мне сообщение `/wish {0}` и следуйте дальнейшим инструкциям, чтобы поздравить этого человека".format(group_name, pair.username, pair.real_name))
+
+def _save():
+    with open("santas.pickle", "wb") as f:
+        pickle.dump(santas, f)
+    with open("wishes.pickle", "wb") as f:
+        pickle.dump(wishes, f)
+
+def _restore():
+    global santas
+    global wishes
+
+    if os.path.exists("santas.pickle"):
+        with open("santas.pickle", "rb") as f:
+            santas = pickle.load(f)
+    if os.path.exists("wishes.pickle"):
+        with open("wishes.pickle", "rb") as f:
+            wishes = pickle.load(f)
 #
 # Команды
 #
